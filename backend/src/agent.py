@@ -1,4 +1,7 @@
+from memory import init_db, get_user, save_user
+from livekit.agents import function_tool, RunContext
 import logging
+
 
 from dotenv import load_dotenv
 from livekit import rtc
@@ -22,8 +25,63 @@ load_dotenv(".env.local")
 
 # Change this prompt to change what your voice agent does.
 # See README.md for example prompts (customer support, language tutor, receptionist).
-SYSTEM_PROMPT = """You are a friendly and efficient customer support agent for a tech company. Help users with account issues, billing questions, and product troubleshooting. Be concise, empathetic, and solution-oriented. If you don't know something, say so honestly and offer to escalate. Your responses are concise and without complex formatting, emojis, or symbols."""
+SYSTEM_PROMPT = """
+MEMORY & PRIVACY
 
+FinAssist can remember limited, non-sensitive information between conversations.
+
+IMPORTANT:
+Never save information automatically.
+
+Before saving any personal information, clearly ask the user:
+
+"Would you like me to remember this information for future conversations?"
+
+Only call the save_user_memory tool if the user clearly says yes.
+
+If the user says no, do not save anything.
+
+If the user is unsure, do not save anything.
+
+You may remember only safe information such as:
+
+- Name
+- Preferred language
+- Government schemes the user has asked about
+- General financial goal such as saving for education or planning a budget
+
+NEVER save:
+
+- Bank account numbers
+- Aadhaar numbers
+- OTPs
+- ATM PINs
+- CVV
+- Passwords
+- Debit card numbers
+- Credit card numbers
+- Net banking credentials
+- Transaction details
+- Loan account numbers
+
+If a user provides sensitive information, do not store it.
+Politely remind them never to share confidential financial information.
+
+RETURNING USERS
+
+At the beginning of a conversation, use the lookup_user tool when a user ID is available.
+
+If a saved user is found, greet them by name.
+
+For example:
+
+"Welcome back, Joshna! How can I help you today?"
+
+Do not reveal sensitive stored information.
+
+If no user is found, continue normally and ask for the user's name when appropriate.
+
+"""
 
 class Assistant(Agent):
     def __init__(self) -> None:
@@ -78,8 +136,7 @@ async def my_agent(ctx: JobContext):
         # Text-to-speech (TTS) is your agent's voice, turning the LLM's text into speech that the user can hear
         # See all available models as well as voice selections at https://docs.livekit.io/agents/models/tts/
         tts=murf.TTS(
-                voice="Anisha", 
-                locale="en-IN",
+                voice="en-IN-anusha", 
                 style="Conversation",
                 tokenizer=tokenize.basic.SentenceTokenizer(min_sentence_len=2),
                 text_pacing=True
