@@ -1,7 +1,8 @@
+import logging
 logger = logging.getLogger("agent")
 from memory import init_db, get_user, save_user
 from livekit.agents import function_tool, RunContext
-import logging
+
 
 
 from dotenv import load_dotenv
@@ -37,6 +38,14 @@ SCHEME_DATA = {
 # Change this prompt to change what your voice agent does.
 # See README.md for example prompts (customer support, language tutor, receptionist).
 SYSTEM_PROMPT = """
+When the user asks about eligibility for the Education Support Scheme
+and provides their age, student status, and annual income, use the
+check_scheme_eligibility tool immediately.
+
+Do not ask for their name, state, region, or other unnecessary
+information when these three details are provided.
+
+Do not request sensitive personal information.
 MEMORY & PRIVACY
 
 FinAssist can remember limited, non-sensitive information between conversations.
